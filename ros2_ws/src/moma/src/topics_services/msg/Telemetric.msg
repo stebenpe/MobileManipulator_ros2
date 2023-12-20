@@ -1,0 +1,10 @@
+string status
+float32 charge
+float64 coordinates_x
+float64 coordinates_y
+float64 theta
+uint32 power
+uint32 eta_min
+uint32 eta_sec
+uint32 order_nr
+uint32 delivery_state
