@@ -13,6 +13,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Telemetric.msg"
   "msg/Order.msg"
+  "msg/PlcCmd.msg"
+  "msg/PlcInfo.msg"
 )
 
 if(BUILD_TESTING)

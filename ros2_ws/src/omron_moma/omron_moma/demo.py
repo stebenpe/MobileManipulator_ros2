@@ -15,8 +15,8 @@ from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.srv import SetParameters
 from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 
-start_goal = 'Goal2'
-end_goal = 'Goal1'
+start_goal = 'coffee_corner'
+end_goal = 'Home'
 
 # Get the coordinates of the new vision base
 def get_base(node, cli):
@@ -242,17 +242,17 @@ def main():
         pickplace_driver.set_position(Goal1_coords.home_pos)
     
     try:     
-        goal2result = action_client.send_goal(start_goal)
-        if not ("Arrived at" in goal2result):
-            node.get_logger().info("Failed to arrive at goal!")
-            exit()
+        # goal2result = action_client.send_goal(start_goal)
+        # if not ("Arrived at" in goal2result):
+        #     node.get_logger().info("Failed to arrive at goal!")
+        #     exit()
         publish_view(Goal2_coords, viewpickpub, viewplacepub)
         tm_handler.execute_tm(Goal2_coords)
         
-        goal1result = action_client.send_goal(end_goal)
-        if not ("Arrived at" in goal1result):
-            node.get_logger().info("Failed to arrive at goal!")
-            exit()
+        # goal1result = action_client.send_goal(end_goal)
+        # if not ("Arrived at" in goal1result):
+        #     node.get_logger().info("Failed to arrive at goal!")
+        #     exit()
         publish_view(Goal1_coords, viewpickpub, viewplacepub)
         tm_handler.execute_tm(Goal1_coords)
         zero = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]

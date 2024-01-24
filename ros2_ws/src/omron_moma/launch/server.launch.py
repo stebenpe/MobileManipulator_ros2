@@ -66,11 +66,25 @@ def generate_launch_description():
         }]
     )
 
+    rosbridge_server = Node(
+        package='rosbridge_server',
+        executable='rosbridge_websocket',
+        output='screen',
+    )
+
+    griperdriver_node = Node(package='robotiq_85_driver',
+                             executable='robotiq_85_driver',
+                             name='robotiq_85_driver',
+                             parameters=[{"num_grippers": 1}, {"comport": "/dev/ttyUSB0"}, {"baud": "115200"}],
+                             output='screen',)
+
     return LaunchDescription([
         tm_driver_node,
         modbus_server_node,
         arcl_api,
         ld_states,
-        action_serve
+        action_serve,
+        griperdriver_node,
+        rosbridge_server
         ])
 

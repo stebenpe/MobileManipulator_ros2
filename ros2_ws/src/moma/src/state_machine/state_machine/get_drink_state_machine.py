@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from topics_services.msg import Telemetric
-from topics_services.msg import Order
+from topics_services.msg import Telemetric, Order
 import random
-import sys
-import time
-# from om_aiv_navigation.goto_goal import AmrActionClient
-# from om_aiv_msg.msg import Status, Location
-
 
 class GetDrinkNode(Node):
     ld_status = ""

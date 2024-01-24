@@ -48,11 +48,13 @@
 
   <link name="chassis">
     <visual>
+      <origin rpy="0 0 1.5707963267949" xyz="-0.019 0 0.368"/>
       <geometry>
         <mesh filename="package://omron_moma/chassis.obj"/>
       </geometry>
     </visual>
     <collision>
+      <origin rpy="0 0 1.5707963267949" xyz="-0.019 0 0.368"/>
       <geometry>
         <mesh filename="package://omron_moma/chassis.stl"/>
       </geometry>
@@ -62,7 +64,7 @@
   <joint name="tm_connector" type="fixed">
     <parent link="chassis"/>
     <child link="tm_base"/>
-    <origin xyz="-0.25 0 0.75" rpy="0 0 1.57"/>
+    <origin xyz="0.14 0 0.8405" rpy="0 0 0"/>
   </joint>
 
   <link name="tm_base">

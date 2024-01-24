@@ -89,6 +89,7 @@ def main():
     rclpy.init()
     node = rclpy.create_node("init")
     cli = node.create_client(AskModbus, 'ask_modbus')
+    io = IO.IOClass()
     tf = Transform.TransformClass()
     listener = Script.ScriptClass()
     modbus_call(node, cli, 'init_io') #Initialise IO
@@ -111,10 +112,10 @@ def main():
     pick_vision_base = run_vision(listener, node, cli, vjob_name, robot_ip)
 
     # Get the pick coordinate w.r.t. robot base, then close the gripper
-    modbus_call(node, cli, 'open_io')
+    io.open()
     input("Set PICK position, then press Enter to continue...")
     base_pick = modbus_call(node, cli, 'get_pos')
-    modbus_call(node, cli, 'close_io')
+    io.close()
 
     # Get the landmark viewing coordinates for place w.r.t robot base
     input("Set LANDMARK position for PLACE, then press Enter to continue...")
@@ -126,7 +127,7 @@ def main():
     # Get the place coordinate w.r.t. robot base, then open the gripper
     input("Set PLACE position, then press Enter to continue...")
     base_place = modbus_call(node, cli, 'get_pos')
-    modbus_call(node, cli, 'open_io')
+    io.open()
 
     print("Initialising pickplace configuration...")
 
