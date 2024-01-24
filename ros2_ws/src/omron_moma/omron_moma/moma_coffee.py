@@ -434,7 +434,7 @@ def main(args=None):
     time.sleep(3)
 
     # Set the LD to move to the designated home position
-    home_result = node.action_client.send_goal(home_goal)
+    home_result = action_client.send_goal(home_goal)
     if not ("Arrived at" in home_result):
         node.get_logger().info("Failed to arrive at home station!")
         exit()
