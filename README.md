@@ -1,8 +1,9 @@
 # ROS2 WS
-In deze map staat alle code van ROS2 voor de LD90 en TM5-900 met ZED 2i 3D camera.
+In deze map staat alle code van ROS2 voor de LD90 en TM5-900. Hieronder is een globaal overzicht te zien van de aspecten binnen ros2:
+![ros2 blog diagram](images/ros2_blok_diagram.png)
 
 # Build
-Als eerst moet er gecontroleerd worden of alle dependencies zijn geinstalleerd die ROS2 nodig heeft voor de te builden package.
+Als eerst moet er gecontroleerd worden of alle dependencies zijn geïnstalleerd die ROS2 nodig heeft voor de te builden package.
 Dit kan gedaan worden door de volgende command line uit te voeren in de ros2_ws directory
 ```
 rosdep update && rosdep install --from-paths src --ignore-src -r -y
@@ -20,12 +21,12 @@ colcon build
 ```
 
 Dit kan eventueel ook op de volgende manier als je wil dat je bij het aanpassen van de code hij dit ook meteen meeneemt.
-Let op dat als je bestandnamen veranderd of nieuwe bestanden toevoegd dit niet werkt.
+Let op dat als je bestandsnamen veranderd of nieuwe bestanden toevoegt dit niet werkt.
 ```
 colcon build --symlink-install
 ```
 
-## 1. Mappen structuur
+# 1. Mappen structuur
 Bij het clonen van de ze reposetory is er de volgende mappen structuur:
 ``` bash
 MobileManipulator_ros2
@@ -38,9 +39,7 @@ MobileManipulator_ros2
 │       ├── LD-90
 │       ├── moma
 │       ├── omron_moma
-│       ├── TM5
-│       ├── zed-ros2-examples
-│       └── zed-ros2-wrapper
+│       └── TM5
 └── README.md
 ```
 Zodra de build is uitgevoerd ziet het er als volgt uit:
@@ -55,9 +54,7 @@ MobileManipulator_ros2
 │   │   ├── LD-90
 │   │   ├── moma
 │   │   ├── omron_moma
-│   │   ├── TM5
-│   │   ├── zed-ros2-examples
-│   │   └── zed-ros2-wrapper
+│   │   └── TM5
 │   ├── build
 │   ├── log
 │   └── install
@@ -66,13 +63,13 @@ MobileManipulator_ros2
 De build, log en install folders worden door colcon gemaakt. Om vervolgens de code te kunnen gebruiken moet je de install folder toevoegen aan je .bashrc bestand. Hierdoor wordt bij het opstarten van een nieuwe terminal of door de huidige te sourcen (source ~/.bashrc) de packages geladen en kan je deze dus ook uitvoeren met ros2 run en ros2 launch.
 
 
-## 2. Ros2 packages uitgelegd
+# 2. Ros2 packages uitgelegd
 
-### 2.1 LD-90
-In de LD-90 package zitten 4 sub packages. Dit zijn amr_visualisation, om_aiv_msg, om_aiv_navigation en om_aiv_util.
+## 2.1 LD-90
+In de LD-90 package zitten 4 sub packages. Dit zijn amr_visualization, om_aiv_msg, om_aiv_navigation en om_aiv_util. Deze zijn grotendeels van [hier](https://github.com/OmronAPAC/Omron_AMR_ROS2/tree/master) overgenomen. Er zijn wel een aantal aanpassingen gedaan om het met ros2 humble te laten samenwerken.
 
-#### 2.1.1 amr_visualisation
-De amr_visualisation package wordt gebruikt voor de RVIZ visualisatie van ros2. In deze package zit de ingescande map en de 3D modellen van de robot. Het 3D model wordt in de visualisatie geplaatst volgens het .urdf bestand. Ook zit er in deze package 4 C++ bestanden die data verwerken voor de visualisatie van de robot. Dit zijn data_points_marker.cpp, goals_marker.cpp, joints_publisher.cpp en laser_scans.cpp. 
+### 2.1.1 amr_visualization
+De amr_visualization package wordt gebruikt voor de RVIZ visualisatie van ros2. In deze package zit de ingescande map en de 3D modellen van de robot. Het 3D model wordt in de visualisatie geplaatst volgens het .urdf bestand. Ook zit er in deze package 4 C++ bestanden die data verwerken voor de visualisatie van de robot. Dit zijn data_points_marker.cpp, goals_marker.cpp, joints_publisher.cpp en laser_scans.cpp. 
 
 De data_points_marker leest het data.map bestand dat van de LD90 is gehaald na het inscannen van de map. Het programma converteert deze data.map naar een formaat dat RVIZ het kan visualiseren. Het haalt ook de verboden gebieden op uit de map en visualiseert deze ook in RVIZ. 
 
@@ -85,29 +82,47 @@ De laser_scans zorgt ervoor dat de laserscan van de robot in RVIZ wordt gevisual
 De package kan worden uitgevoerd door de volgende command line uit te voeren:
 
 ```
-ros2 launch amr_visualisation display.launch
+ros2 launch amr_visualization display.launch.py
 ```
 
-#### 2.1.2 om_aiv_msg
-De packages van de LD90 maken gebruik van custom messages. Deze messages worden gemaakt door de om_aiv_msg package. Deze package bevat de messages die nodig zijn voor de communicatie tussen de verschilende nodes die draaien. In deze custom message bestanden staat gedefinieerd welke variabelen er in de message zitten, van welk type deze zijn (int, uint, string, float, etc..) en of er ook een gedefinieerd response moet zijn. dit laatste is alleen bij services en niet bij topics.
+### 2.1.2 om_aiv_msg
+De packages van de LD90 maken gebruik van custom messages. Deze messages worden gemaakt door de om_aiv_msg package. Deze package bevat de messages die nodig zijn voor de communicatie tussen de verschillende nodes die draaien. In deze custom message bestanden staat gedefinieerd welke variabelen er in de message zitten, van welk type deze zijn (int, uint, string, float, etc..) en of er ook een gedefinieerd response moet zijn. dit laatste is alleen bij services en niet bij topics.
 
-#### 2.1.3 om_aiv_navigation
+### 2.1.3 om_aiv_navigation
+De om_aiv_navigation package is een library package. Hierin zitten verschillende functies die door de andere packages worden opgeroepen. Dit is bijvoorbeeld het sturen naar een goal die op de LD90 is ingesteld, het sturen naar het docking station en nog een andere paar.
+
+### 2.1.4 om_aiv_util
+De om_aiv_util package kan worden gezien als de server package. Deze moet worden gestart om überhaupt iets te kunnen aansturen. Hier zit namelijk de ARCL server in welke commando's stuurt en data ontvangt van en naar de LD90. Hier is ook het IP adres van de LD90 in ingesteld en mocht er iets moeten worden uitgebreid aan commando's kan dat worden gedaan in deze package. Ook zit hier de LD state publisher in, deze ontvangt alle data zoals positie van de LD90 en vertaald dit naar iets dat ros2 kan gebruiken in bijvoorbeeld RVIZ2.
+
+Deze package kan op de volgende manier worden gestart:
+```
+ros2 launch om_aiv_util server.launch.py
+```
+
+## 2.2 moma
+Deze package is bedoeld voor de website. Hier zit de package topics_services in met daarin de order en telemetric message die worden gebruikt door de website. De order message wordt gesubscribed door het moma_coffee.py programma (zie omron_moma package) en op gepublished door de website. De telemetric wordt gesubscribed door de website en gepublished door moma_coffee.py
+
+## 2.3 TM5
+
+## 2.4 omron_moma
+In deze package worden de vorige packages samengevoegd tot een geheel. Hier zitten ook de demo en inleer programma's in.
+
+### 2.4.1 launch
+Als je de volledige moma wil opstarten hoef je niet de de LD90 of TM5 ros2 drivers op te starten. Deze worden hierin allemaal al gedaan. Hier zitten 2 verschillende launch bestanden in met elke ook een headless versie (deze start op de achtergrond op). Als eerst moet op de NVIDIA Jetson de server worden opgestart. Dit gaat op de volgende manier:
+```
+ros2 launch omron_moma server.launch.py robot_ip:=192.168.44.14
+```
+Dit start de LD90, TM5, robotiq gripper en rosbridge server (voor de website) op. Zodra dit is opgestart kan je alles doen wat je wil met de moma qua aansturen. Let er alleen wel op dat de TF2 functies nu niet zijn opgestart. Deze geeft de referentie punten om met bijvoorbeeld de camera iets op te pakken met een TM-marker. Om dit te kunnen doen moet ook de visualisatie worden opgestart. Dit hoeft niet perse op de NVIDA Jetson maar moet wel op hetzelfde netwerk als deze zitten en dit netwerk moet openstaan voor ros2 commando's (dit is niet bij elk netwerk, wel binnen het smartindustry netwerk). Dit kan op de volgende manier worden opgestart:
+```
+ros2 launch omron_moma visualization.launch.py
+```
+Dit start de verschillende state publisher en visualization nodes op. Ook laad dit de robot description met RVIZ2 (zie 2.4.3 robot description)
+
+### 2.4.2 omron moma
+In deze package zitten alle demo en inleer programma's. Deze kunnen makkelijk worden hergebruikt/aangepast worden voor toekomstige projecten. Er is echter geen voorbeeld met MoveIt2 kunnen maken wegens tijdgebrek (dit is voor complexere applicaties voor de minor ASE). De demo.py en 
+
+### 2.4.3 robot description
 
 
-
-#### 2.1.4 om_aiv_util
-
-
-### 2.2 moma
-
-### 2.3 omron_moma
-
-### 2.4 TM5
-
-
-### 2.5 zed-ros2-examples
-
-### 2.6 zed-ros2-wrapper
-
-## 3. Demo programma
+# 3. Demo programma
 
