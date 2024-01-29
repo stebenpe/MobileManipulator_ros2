@@ -104,6 +104,19 @@ Deze package is bedoeld voor de website. Hier zit de package topics_services in 
 
 ## 2.3 TM5
 
+
+### 2.3.1 Robotiq gripper
+Omdat de robotiq gripper niet op de IO is aangesloten maar op de COM1 poort van de TM5 was het niet mogelijk om deze met modbus of TCP/IP aan te sturen zonder deze uit de listener node te halen. Daarom is er voor gekozen om een usb naar RS232 converter te gebruiken en deze op de NVIDIA Jetson aan te sluiten. Dit betekende wel dat de IO driver een stukje moest worden herschreven. In de IO driver is nu een publisher toegevoegd welke op de gripper_cmd topic published. Deze topic is vervolgens weer verbonden met een ros2 robotiq driver. Deze driver is standaard ingesteld op ttyUSB0 met een baudrate van 115200, dit zijn de standaard instellingen en zouden altijd moeten werken (tenzij je natuurlijk een ander ttyUSB apparaat toevoegd). 
+
+### 2.3.2 Modbus
+De robotarm is ingesteld als ethernet slave maar ook Modbus TCP is geactiveerd. Dit zorgt er voor dat de robotarm positie en andere gegevens kunnen worden uitgelezen zonder dat het programma draait. Dit is erg handig omdat je dus de robotarm in free mode kan bewegen en ondertussen live de positie kan uitlezen. Dit wordt bijvoorbeeld gebruikt in het inleer programma van de demo. Er is een modbus.py programma welke de commando's stuurt en ontvangt. Deze zou makkelijk kunnen worden aangepast. De registers met informatie is online te vinden of in de Modbus instellingen van de roborarm. Via modbus kan onder andere het voltage, vermogen, temperatuur, programma informatie, etc worden uitgelezen. Ook kanb de IO worden aangestuurd en zelfs de controller met de play/pause knop kan je bedienen, je kan dus met modbus het programma automatisch laten starten.
+
+### 2.3.3 TCP/IP listener node
+
+
+### 2.3.4 TM state publisher
+De TM state publisher geeft de hoeken van de robotarm links door. Dit wordt vervolgens gevisualiseerd in RVIZ2. Dit komt door het URDF bestand waar de links in zijn gedefinieerd. Voor meer informatie hieropver zie 2.4.3 Robot description
+
 ## 2.4 omron_moma
 In deze package worden de vorige packages samengevoegd tot een geheel. Hier zitten ook de demo en inleer programma's in.
 
@@ -119,10 +132,18 @@ ros2 launch omron_moma visualization.launch.py
 Dit start de verschillende state publisher en visualization nodes op. Ook laad dit de robot description met RVIZ2 (zie 2.4.3 robot description)
 
 ### 2.4.2 omron moma
-In deze package zitten alle demo en inleer programma's. Deze kunnen makkelijk worden hergebruikt/aangepast worden voor toekomstige projecten. Er is echter geen voorbeeld met MoveIt2 kunnen maken wegens tijdgebrek (dit is voor complexere applicaties voor de minor ASE). De demo.py en 
+In deze package zitten alle demo en inleer programma's. Deze kunnen makkelijk worden hergebruikt/aangepast worden voor toekomstige projecten. Er is echter geen voorbeeld met MoveIt2 kunnen maken wegens tijdgebrek (dit is voor complexere applicaties voor de minor ASE). De demo.py en teach_demo.py horen bij elkaar en de moma_coffee.py en teach_moma_coffee.py horen bij elkaar. De eerste is elke keer het inleer programma en de tweede is om het ingeleerde programma uit te voeren. Deze kunnen op de volgende manier gestart worden:
+```
+ros2 run omron_moma <programma naam>
+```
+Let er wel op dat bij het inleer programma het ip-adres mee moet worden gegeven als argument. Hieronder een voorbeeld hiervan:
+```
+ros2 run omron_moma teach_moma_coffee 192.168.44.14
+```
 
-### 2.4.3 robot description
 
+### 2.4.3 Robot description
+De robot is omschreven met een URDF bestand. Deze kan RVIZ2 vervolgens uitlezen en gebruiken voor de visualisatie. Ook wordt de URDF gebruikt voor de TF2 markers. Waar dit bijvoorbeeld wordt gebruikt is bij de TM robot marker. Deze word door de camera van de robot gezien en geeft vervolgens door op welke coordinaten deze zit. Dit wordt vervolgens als TF2 gepublished en wordt vanaf dat punt gekeken naar de ingeleerde coordinaten vanaf de marker. Deze coordinaten worden vervolgens naar de robotarm gestuurd en deze zal het object dan oppakken. De urdf wordt ook geupdate door de verschilende state publishers deze zeggen bijvoorbeeld dat de LD90 op de coordinaten 100,200 is. De RVIZ2 visualisatie update dan het 3D model naar die plek. Aan de LD90 zit ook het chassis en robotarm verbonden door de URDF dus deze zullen dan ook meebewegen in RVIZ2.
 
 # 3. Demo programma
 
