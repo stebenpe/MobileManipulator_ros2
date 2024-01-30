@@ -401,15 +401,6 @@ def main(args=None):
         exit()
     
     node.deliver_location = ""
-    # ld_charge = 0
-    # ld_x = 0
-    # ld_y = 0
-    # ld_theta = 0
-    # power = 0
-    # eta_min = 0
-    # eta_sec = 0
-    # order_nr = 0
-    # delivery_state = 0
 
     node.should_spin = True
 

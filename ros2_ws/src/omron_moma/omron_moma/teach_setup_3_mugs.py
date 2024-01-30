@@ -110,20 +110,14 @@ def main():
     input("Set 1st PICK position, then press Enter to continue...")
     base_pick_1 = modbus_call(node, cli, 'get_pos')
     io.close()
-    input("Set 1st PICK offset position, then press Enter to continue...")
-    base_pick_1_offset = modbus_call(node, cli, 'get_pos')
     io.open()
     input("Set 2nd PICK position, then press Enter to continue...")
     base_pick_2 = modbus_call(node, cli, 'get_pos')
     io.close()
-    input("Set 2nd PICK offset position, then press Enter to continue...")
-    base_pick_2_offset = modbus_call(node, cli, 'get_pos')
     io.open()
     input("Set 3rd PICK position, then press Enter to continue...")
     base_pick_3 = modbus_call(node, cli, 'get_pos')
     io.close()
-    input("Set 3rd PICK offset position, then press Enter to continue...")
-    base_pick_3_offset = modbus_call(node, cli, 'get_pos')
 
     # Get the landmark viewing coordinates for place w.r.t robot base
     input("Set LANDMARK position for PLACE, then press Enter to continue...")
@@ -141,11 +135,8 @@ def main():
 
     # Obtain the pick and place coordinates w.r.t VISION base
     vbase_pick_1 = tf.transform_pp(base_pick_1, pick_vision_base, 'pick_1', 'vbase_pick_1')
-    vbase_pick_1_offset = tf.transform_pp(base_pick_1_offset, pick_vision_base, 'pick_1_offset', 'vbase_pick_1_offset')
     vbase_pick_2 = tf.transform_pp(base_pick_2, pick_vision_base, 'pick_2', 'vbase_pick_2')
-    vbase_pick_2_offset = tf.transform_pp(base_pick_2_offset, pick_vision_base, 'pick_2_offset', 'vbase_pick_2_offset')
     vbase_pick_3 = tf.transform_pp(base_pick_3, pick_vision_base, 'pick_3', 'vbase_pick_3')
-    vbase_pick_3_offset = tf.transform_pp(base_pick_3_offset, pick_vision_base, 'pick_3_offset', 'vbase_pick_3_offset')
     vbase_place = tf.transform_pp(base_place, place_vision_base, 'place', 'vbase_place')
 
     # Export variables to a txt file
@@ -155,11 +146,8 @@ def main():
         "view_pick": view_pick,
         "view_place": view_place,
         "vbase_pick_1": convert_deg(vbase_pick_1),
-        "vbase_pick_1_offset": convert_deg(vbase_pick_1_offset),
         "vbase_pick_2": convert_deg(vbase_pick_2),
-        "vbase_pick_2_offset": convert_deg(vbase_pick_2_offset),
         "vbase_pick_3": convert_deg(vbase_pick_3),
-        "vbase_pick_3_offset": convert_deg(vbase_pick_3_offset),
         "vbase_place": convert_deg(vbase_place)
     }
 

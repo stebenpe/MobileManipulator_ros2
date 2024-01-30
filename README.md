@@ -103,16 +103,16 @@ ros2 launch om_aiv_util server.launch.py
 Deze package is bedoeld voor de website. Hier zit de package topics_services in met daarin de order en telemetric message die worden gebruikt door de website. De order message wordt gesubscribed door het moma_coffee.py programma (zie omron_moma package) en op gepublished door de website. De telemetric wordt gesubscribed door de website en gepublished door moma_coffee.py
 
 ## 2.3 TM5
-
+Voor de TM5 is [deze](https://github.com/OmronAPAC/Omron_TM_ROS2) repository gebruikt van OmronAPAC. Deze is wel aangepast om met ros2 humble te werken en om met de robotiq gripper over usb te werken.
 
 ### 2.3.1 Robotiq gripper
-Omdat de robotiq gripper niet op de IO is aangesloten maar op de COM1 poort van de TM5 was het niet mogelijk om deze met modbus of TCP/IP aan te sturen zonder deze uit de listener node te halen. Daarom is er voor gekozen om een usb naar RS232 converter te gebruiken en deze op de NVIDIA Jetson aan te sluiten. Dit betekende wel dat de IO driver een stukje moest worden herschreven. In de IO driver is nu een publisher toegevoegd welke op de gripper_cmd topic published. Deze topic is vervolgens weer verbonden met een ros2 robotiq driver. Deze driver is standaard ingesteld op ttyUSB0 met een baudrate van 115200, dit zijn de standaard instellingen en zouden altijd moeten werken (tenzij je natuurlijk een ander ttyUSB apparaat toevoegd). 
+Omdat de robotiq gripper niet op de IO is aangesloten maar op de COM1 poort van de TM5 was het niet mogelijk om deze met modbus of TCP/IP aan te sturen zonder deze uit de listener node te halen. Daarom is er voor gekozen om een usb naar RS232 converter te gebruiken en deze op de NVIDIA Jetson aan te sluiten. Dit betekende wel dat de IO driver een stukje moest worden herschreven. In de IO driver is nu een publisher toegevoegd welke op de gripper_cmd topic published. Deze topic is vervolgens weer verbonden met een ros2 robotiq driver. Deze driver is standaard ingesteld op ttyUSB0 met een baudrate van 115200, dit zijn de standaard instellingen en zouden altijd moeten werken (tenzij je natuurlijk een ander ttyUSB apparaat toevoegt). 
 
 ### 2.3.2 Modbus
-De robotarm is ingesteld als ethernet slave maar ook Modbus TCP is geactiveerd. Dit zorgt er voor dat de robotarm positie en andere gegevens kunnen worden uitgelezen zonder dat het programma draait. Dit is erg handig omdat je dus de robotarm in free mode kan bewegen en ondertussen live de positie kan uitlezen. Dit wordt bijvoorbeeld gebruikt in het inleer programma van de demo. Er is een modbus.py programma welke de commando's stuurt en ontvangt. Deze zou makkelijk kunnen worden aangepast. De registers met informatie is online te vinden of in de Modbus instellingen van de roborarm. Via modbus kan onder andere het voltage, vermogen, temperatuur, programma informatie, etc worden uitgelezen. Ook kanb de IO worden aangestuurd en zelfs de controller met de play/pause knop kan je bedienen, je kan dus met modbus het programma automatisch laten starten.
+De robotarm is ingesteld als ethernet slave maar ook Modbus TCP is geactiveerd. Dit zorgt er voor dat de robotarm positie en andere gegevens kunnen worden uitgelezen zonder dat het programma draait. Dit is erg handig omdat je dus de robotarm in free mode kan bewegen en ondertussen live de positie kan uitlezen. Dit wordt bijvoorbeeld gebruikt in het inleer programma van de demo. Er is een modbus.py programma welke de commando's stuurt en ontvangt. Deze zou makkelijk kunnen worden aangepast. De registers met informatie is online te vinden of in de Modbus instellingen van de roborarm. Via modbus kan onder andere het voltage, vermogen, temperatuur, programma informatie, etc worden uitgelezen. Ook kan de IO worden aangestuurd en zelfs de controller met de play/pause knop kan je bedienen, je kan dus met modbus het programma automatisch laten starten.
 
 ### 2.3.3 TCP/IP listener node
-
+De TM5 is ingesteld als ethernet slave en heeft daarvoor ook een listener node die in de TMFlow is gezet. Deze wacht op commando's van ros2 en kan dan vervolgens een vision node starten. Dit wordt ook in het demo programma gebruikt om de coördinaten van de TM marker op te halen voor de pick & place positie.
 
 ### 2.3.4 TM state publisher
 De TM state publisher geeft de hoeken van de robotarm links door. Dit wordt vervolgens gevisualiseerd in RVIZ2. Dit komt door het URDF bestand waar de links in zijn gedefinieerd. Voor meer informatie hieropver zie 2.4.3 Robot description
@@ -141,9 +141,56 @@ Let er wel op dat bij het inleer programma het ip-adres mee moet worden gegeven 
 ros2 run omron_moma teach_moma_coffee 192.168.44.14
 ```
 
-
 ### 2.4.3 Robot description
-De robot is omschreven met een URDF bestand. Deze kan RVIZ2 vervolgens uitlezen en gebruiken voor de visualisatie. Ook wordt de URDF gebruikt voor de TF2 markers. Waar dit bijvoorbeeld wordt gebruikt is bij de TM robot marker. Deze word door de camera van de robot gezien en geeft vervolgens door op welke coordinaten deze zit. Dit wordt vervolgens als TF2 gepublished en wordt vanaf dat punt gekeken naar de ingeleerde coordinaten vanaf de marker. Deze coordinaten worden vervolgens naar de robotarm gestuurd en deze zal het object dan oppakken. De urdf wordt ook geupdate door de verschilende state publishers deze zeggen bijvoorbeeld dat de LD90 op de coordinaten 100,200 is. De RVIZ2 visualisatie update dan het 3D model naar die plek. Aan de LD90 zit ook het chassis en robotarm verbonden door de URDF dus deze zullen dan ook meebewegen in RVIZ2.
+De robot is omschreven met een URDF bestand. Deze kan RVIZ2 vervolgens uitlezen en gebruiken voor de visualisatie. Ook wordt de URDF gebruikt voor de TF2 markers. Waar dit bijvoorbeeld wordt gebruikt is bij de TM robot marker. Deze word door de camera van de robot gezien en geeft vervolgens door op welke coördinaten deze zit. Dit wordt vervolgens als TF2 gepublished en wordt vanaf dat punt gekeken naar de ingeleerde coördinaten vanaf de marker. Deze coördinaten worden vervolgens naar de robotarm gestuurd en deze zal het object dan oppakken. De URDF wordt ook geupdate door de verschilende state publishers deze zeggen bijvoorbeeld dat de LD90 op de coördinaten 100,200 is. De RVIZ2 visualisatie update dan het 3D model naar die plek. Aan de LD90 zit ook het chassis en robotarm verbonden door de URDF dus deze zullen dan ook meebewegen in RVIZ2.
 
 # 3. Demo programma
 
+## 3.1 Inleer programma
+Het is aangeraden om een inleer programma te maken voor elk groot of klein programma dat wordt gemaakt. Dit omdat het dan een stuk sneller gaat en uiteindelijk dus tijd scheelt (bijna niks gaat in een keer goed :-)). Het maken van een inleer programma is redelijk simpel. Je kan met de volgende lijn de coördinaten van de robot opvragen:
+
+``` python
+convert_rad(modbus_call(node, cli, 'get_pos'))
+```
+Voor het inleren van een pick of place positie hoeft de convert_rad() functie niet gebruikt te worden.
+
+De vision base voor de pick & place reverentie kan op de volgende manier gedaan worden:
+``` python
+run_vision(listener, node, cli, vjob_name, robot_ip)
+```
+
+Vervolgens worden alle coördinaten in de tf buffer geplaatst en wordt alles in een config.txt bestand opgeslagen wat het start programma vervolgens weer uitvoert.
+
+## 3.2 Hoofd programma
+Het hoofdprogramma is het programma dat de ingeleerde coördinaten en goals uitleest en uitvoert. Dit gaat op de volgende manier. Om de LD90 naar een goal te sturen wordt het ingeleerde/gedefinieerde goal op de volgende manier uitgevoerd:
+``` python
+goal_result = action_client.send_goal(goal_name)
+if not ("Arrived at" in goal_result):
+    node.get_logger().info("Failed to arrive at home station!")
+    exit()
+```
+Hierin is goal_name de naam van het ingeleerde/gedefinieerde goal, dit kan ook een variabele zijn.
+
+Op de volgende manier kan de robot arm naar een ingeleerd/gedefinieerd goal sturen:
+``` python
+current_position = get_current_pos(node, cli)
+if not check_same_positions(current_position, coffee_machine_coords.home_pos):
+    pickplace_driver.set_position(coffee_machine_coords.home_pos)
+```
+Voor de pick & place posities kan de volgende functie worden opgeroepen:
+``` python
+tm_handler.execute_tm(coords, 1)
+```
+Hierin is coords de coordinates class met de coördinaten van de pick & place posities. De 1 geeft in dit voorbeeld aan welke pick positie die moet pakken gezien er meerdere mogelijkheden zijn in het moma_coffee programma.
+
+In de execute_tm() wordt de pick & place functie stap voor stap afgelegd. Het begint met de pick & place posities toe te voegen aan de TF buffer. Vervolgens wordt er een safepick/safeplace coördinaat gemaakt door een offset aan de coördinaten te doen. Dit wordt allemaal op de volgende manier gedaan:
+
+``` python
+self.tf.add_vbases(coord.vbase_pick, coord.vbase_place)
+pick, safepick = get_positions(self.pickplace_driver, self.node, self.cli, self.tf, "vbase_pick_1", coord.vjob_name_pick)
+place, safeplace = get_positions(self.pickplace_driver, self.node, self.cli, self.tf, "vbase_place", coord.vjob_name_place)
+```
+Vervolgens kan de robotarm naar deze posities worden gestuurd op de volgende manier:
+``` python
+self.pickplace_driver.set_position(pick)
+```
