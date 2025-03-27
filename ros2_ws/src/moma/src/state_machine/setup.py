@@ -21,7 +21,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "get_drink_state_machine = state_machine.get_drink_state_machine:main"
+            "get_drink_state_machine = state_machine.get_drink_state_machine:main",
+            "demo = state_machine.demo:main"
         ],
     },
 )

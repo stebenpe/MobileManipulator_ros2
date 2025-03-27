@@ -31,6 +31,7 @@ setup(
             'demo = omron_moma.demo:main',
             'moma_coffee = omron_moma.moma_coffee:main',
             'teach_setup = omron_moma.teach_setup:main',
+            'teach_robot_arm = omron_moma.teach_robot_arm:main',
             'teach_setup_3_mugs = omron_moma.teach_setup_3_mugs:main',
             'teach_moma_coffee = omron_moma.teach_moma_coffee:main',
             'view_publisher = omron_moma.view_transform_publisher:main'

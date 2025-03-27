@@ -388,10 +388,11 @@ def main(args=None):
     #TODO safety plc set robotarm active
 
     # Set the TM to move to the designated home position
+    node.get_logger().info("Checking home position")
     current_position = get_current_pos(node, cli)
     if not check_same_positions(current_position, coffee_machine_coords.home_pos):
         pickplace_driver.set_position(coffee_machine_coords.home_pos)
-
+    node.get_logger().info("send home")
     #TODO safety plc set AMR active
 
     # Set the LD to move to the designated home position
