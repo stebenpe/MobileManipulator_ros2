@@ -336,21 +336,8 @@ def order(msg, node):
     node.get_logger().info('Received sugar: {}'.format(node.sugar))
 
     node.should_spin = False
-    # get_coffee(node)
 
-# def SendTelemetric(node):
-#     msg = Telemetric()
-#     # msg.status = self.ld_status
-#     msg.charge = node.ld_charge
-#     msg.coordinates_x = node.ld_x
-#     msg.coordinates_y = node.ld_y
-#     msg.theta = node.ld_theta
-#     # msg.power = random.randint(0,255)
-#     # msg.eta_min = random.randint(0,10)
-#     # msg.eta_sec = random.randint(0,60)
-#     # msg.order_nr = random.randint(0,255)
-#     msg.delivery_state = node.delivery_state
-#     node.publisher_.publish(msg)
+
 def __init__(self):
     print("Init works")
 

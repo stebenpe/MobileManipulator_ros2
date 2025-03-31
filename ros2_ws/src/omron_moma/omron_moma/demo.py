@@ -15,8 +15,8 @@ from geometry_msgs.msg import TransformStamped
 from rcl_interfaces.srv import SetParameters
 from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 
-start_goal = 'coffee_corner'
-end_goal = 'Home'
+start_goal = 'load'
+end_goal = 'unload'
 
 # Get the coordinates of the new vision base
 def get_base(node, cli):
@@ -47,9 +47,9 @@ def get_positions(listener, node, cli, tf, vbase_name, vjob_name):
     listener.change_base("RobotBase")
     time.sleep(0.1)
     if (vbase_name == "vbase_pick"):
-        return tf.get_picks(new_vbase, vbase_name)
+        return tf.get_picks(new_vbase, vbase_name, False)
     elif (vbase_name == "vbase_place"):
-        return tf.get_places(new_vbase, vbase_name)
+        return tf.get_places(new_vbase, vbase_name, False)
     else:
         return new_vbase
 
@@ -136,6 +136,8 @@ class Coordinates:
             self.view_place = self.data['view_place']
             self.vbase_pick = self.data['vbase_pick']
             self.vbase_place = self.data['vbase_place']
+            self.safeplace_block = self.data['safeplace_block']
+            self.block = self.data['block']
 
 class TMHandler:
     def __init__(self, node, pickplace_driver):
@@ -148,8 +150,8 @@ class TMHandler:
         self.pickplace_driver.wait_tm_connect()
       
     # Executes the pickplace sequence at the designated goal
-    def execute_tm(self, coord):
-        self.tf.add_vbases(coord.vbase_pick, coord.vbase_place)
+    def execute_tm(self, coord, action_client, node):
+        self.tf.add_vbases(coord.vbase_pick, coord.vbase_place, 0, False)
      
         self.pickplace_driver.set_position(coord.view_pick)
         if not self.pickplace_driver.error:
@@ -174,6 +176,22 @@ class TMHandler:
             self.flagpublisher.publish(msg)
             # moves the gripper back to above the object
             self.pickplace_driver.set_position(safepick)
+
+        self.pickplace_driver.set_position(coord.safeplace_block)
+        self.pickplace_driver.set_position(coord.block)
+        self.pickplace_driver.open()
+        self.pickplace_driver.set_position(coord.safeplace_block)
+        self.pickplace_driver.set_position(coord.home_pos)
+
+        goal2result = action_client.send_goal('Goal2')
+        if not ("Arrived at" in goal2result):
+            node.get_logger().info("Failed to arrive at goal!")
+            exit()
+        
+        self.pickplace_driver.set_position(coord.safeplace_block)
+        self.pickplace_driver.set_position(coord.block)
+        self.pickplace_driver.close()
+        self.pickplace_driver.set_position(coord.safeplace_block)
 
         self.pickplace_driver.set_position(coord.view_place)
         if not self.pickplace_driver.error:
@@ -231,8 +249,8 @@ def main():
     viewpickpub = node.create_publisher(TransformStamped, 'view_pick', 10)
     viewplacepub = node.create_publisher(TransformStamped, 'view_place', 10)
     # Load the coordinates taught in teach_setup for the respective goals
-    Goal1_coords = Coordinates(end_goal)
-    Goal2_coords = Coordinates(start_goal)
+    # Goal2_coords = Coordinates(end_goal)
+    Goal1_coords = Coordinates(start_goal)
 
     # Set the TM to move to the designated home position
     current_position = get_current_pos(node, cli)
@@ -242,19 +260,12 @@ def main():
         pickplace_driver.set_position(Goal1_coords.home_pos)
     
     try:     
-        # goal2result = action_client.send_goal(start_goal)
-        # if not ("Arrived at" in goal2result):
-        #     node.get_logger().info("Failed to arrive at goal!")
-        #     exit()
-        publish_view(Goal2_coords, viewpickpub, viewplacepub)
-        tm_handler.execute_tm(Goal2_coords)
-        
-        # goal1result = action_client.send_goal(end_goal)
-        # if not ("Arrived at" in goal1result):
-        #     node.get_logger().info("Failed to arrive at goal!")
-        #     exit()
+        goal1result = action_client.send_goal('Goal1')
+        if not ("Arrived at" in goal1result):
+            node.get_logger().info("Failed to arrive at goal!")
+            exit()
         publish_view(Goal1_coords, viewpickpub, viewplacepub)
-        tm_handler.execute_tm(Goal1_coords)
+        tm_handler.execute_tm(Goal1_coords, action_client, node)
         zero = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         call_set_parameters(node, zero)
         flagpublisher = node.create_publisher(MoveCube, 'objectflag', 10)

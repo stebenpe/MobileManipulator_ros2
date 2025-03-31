@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1
+        - /TF1/Frames1
         - /RobotModel1
       Splitter Ratio: 0.5
     Tree Height: 787
@@ -21,6 +22,7 @@ Panels:
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
+      - /Current View1/Focal Point1
     Name: Views
     Splitter Ratio: 0.5
 Visualization Manager:
@@ -92,8 +94,8 @@ Visualization Manager:
       Marker Scale: 1
       Name: TF
       Show Arrows: false
-      Show Axes: false
-      Show Names: false
+      Show Axes: true
+      Show Names: true
       Tree:
         map:
           pose:
@@ -347,25 +349,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/ThirdPersonFollower
-      Distance: 5.046927452087402
+      Distance: 6
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.7850386500358582
-        Y: -2.436635971069336
-        Z: 1.9073486328125e-06
+        X: 0
+        Y: 0
+        Z: 1
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4947963356971741
-      Target Frame: <Fixed Frame>
+      Pitch: 0.4000000059604645
+      Target Frame: chassis
       Value: ThirdPersonFollower (rviz_default_plugins)
-      Yaw: 4.202389240264893
+      Yaw: 3.140000104904175
     Saved: ~
 Window Geometry:
   Displays:

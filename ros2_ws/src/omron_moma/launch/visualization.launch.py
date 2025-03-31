@@ -49,7 +49,7 @@ def generate_launch_description():
     vis_config = get_package_share_directory('amr_visualisation') + "/param/vis_param.yaml"
 
     # RViz
-    rviz_config_file = "src/omron_moma/config/moma_rviz.rviz"
+    rviz_config_file = "/home/smart-industry/MobileManipulator_ros2/ros2_ws/src/omron_moma/config/moma_rviz.rviz"
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',

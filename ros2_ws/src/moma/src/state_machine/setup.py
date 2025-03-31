@@ -1,4 +1,6 @@
 from setuptools import setup
+import os
+from glob import glob
 
 package_name = 'state_machine'
 submodules = "state_machine/submodules"
@@ -11,6 +13,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,7 +25,9 @@ setup(
     entry_points={
         'console_scripts': [
             "get_drink_state_machine = state_machine.get_drink_state_machine:main",
-            "demo = state_machine.demo:main"
+            "demo = state_machine.demo:main",
+            "moma_beckhoff = state_machine.moma_beckhoff:main",
+            "moma_opc_ua = state_machine.moma_opc_ua:main"
         ],
     },
 )

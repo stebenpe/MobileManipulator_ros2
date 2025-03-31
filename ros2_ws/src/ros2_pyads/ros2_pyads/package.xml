@@ -1,18 +1,15 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>state_machine</name>
+  <name>ros2_pyads</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="robotica-dev@todo.todo">robotica-dev</maintainer>
+  <maintainer email="60989139+jodle001@users.noreply.github.com">jodle</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>rclpy</depend>
-  <depend>topics_services</depend>
-  <depend>geometry_msgs</depend>
-  <depend>asyncua</depend>
-  <depend>asyncio</depend>
+  <depend>pyaml</depend>
   <depend>pyads</depend>
+  <depend>ros2_pyads_interfaces</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
