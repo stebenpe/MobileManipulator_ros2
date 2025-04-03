@@ -121,7 +121,7 @@ class PickPlaceClass:
         self._gripper_cmd[0].speed = 0.02
         self._gripper_cmd[0].force = 1.0
         self._gripper_pub.publish(self._gripper_cmd[0])
-        time.sleep(2)
+        time.sleep(0.5)
 
         #TODO check gripper
 
@@ -139,7 +139,7 @@ class PickPlaceClass:
         self._gripper_cmd[0].speed = 0.02
         self._gripper_cmd[0].force = 1.0
         self._gripper_pub.publish(self._gripper_cmd[0])
-        time.sleep(2)
+        time.sleep(1.5)
 
         #TODO check gripper
             
@@ -152,6 +152,7 @@ class PickPlaceClass:
         if self.error:
             raise TM_Exception(self.error_msg, self.error_code)
         self.move_request.positions = position
+        self.move_request.velocity = 3.14
         while not self.set_pos.wait_for_service(timeout_sec=1.0):
             self.node.get_logger().info('set_positions service not available, waiting again...')
         self.set_pos.call_async(self.move_request)

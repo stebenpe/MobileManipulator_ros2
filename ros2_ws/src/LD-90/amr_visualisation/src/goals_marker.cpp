@@ -121,6 +121,10 @@ int main(int argc, char** argv)
     goal_texts_b_clr = node->get_parameter(GOAL_TEXTS_B_CLR_PARAM).as_double();
 
     auto arcl_api_client = node->create_client<om_aiv_msg::srv::ArclApi>(API_SRV_NAME);
+    if (!arcl_api_client->wait_for_service(std::chrono::seconds(5))) {
+        RCLCPP_ERROR(node->get_logger(), "Service %s not available after waiting 5 seconds", API_SRV_NAME.c_str());
+        return 0;
+    }
     auto goals_pub = node->create_publisher<visualization_msgs::msg::MarkerArray>(goals_vis_topic, 10);
     auto all_goals_sub = node->create_subscription<std_msgs::msg::String>(ALL_GOALS_TOPIC, 10, all_goals_cb);
 
@@ -191,8 +195,13 @@ void req_goals_coord(
     visualization_msgs::msg::Marker one_goal,
     visualization_msgs::msg::Marker one_goal_text)
 {
+    if (goals_list.empty()) {
+        RCLCPP_WARN(node->get_logger(), "No goals in the list to request coordinates for");
+        return;
+    }
     // Request for every known goal's coordinates.
     goals.markers.clear();
+    goals_text.markers.clear();
     goals_id = 0;
     goal_texts_id = 0;
     std::string cmd = GOAL_CMD;
@@ -233,9 +242,13 @@ void req_goals_coord(
             one_goal_text.id = goal_texts_id++;
             goals_text.markers.push_back(one_goal_text);
         }
-        // }
+        else if (info_resp.find(GOALS_LIST_END) != std::string::npos) {
+            RCLCPP_WARN(node->get_logger(), "Goal '%s' not found in map", goals_list[i].c_str());
+            continue;
+        }
         else
         {
+            RCLCPP_ERROR(node->get_logger(), "Failed to find coordinates in response: %s", info_resp.c_str());
             RCLCPP_ERROR(node->get_logger(), "Failed to call %s service for goal info.", API_SRV_NAME.c_str());
         }
     }

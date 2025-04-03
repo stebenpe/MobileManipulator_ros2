@@ -31,11 +31,11 @@ class IOClass:
         
         
         self.io_node.get_logger().info('opening gripper')
-        self._gripper_cmd[0].position = 0.08 # 0.085 to fully open
+        self._gripper_cmd[0].position = 0.035 # 0.085 to fully open
         self._gripper_cmd[0].speed = 0.02
         self._gripper_cmd[0].force = 1.0
         self._gripper_pub.publish(self._gripper_cmd[0])
-        time.sleep(2)
+        time.sleep(0.5)
 
         #TODO check gripper
 
@@ -50,7 +50,7 @@ class IOClass:
         self._gripper_cmd[0].speed = 0.02
         self._gripper_cmd[0].force = 1.0
         self._gripper_pub.publish(self._gripper_cmd[0])
-        time.sleep(2)
+        time.sleep(1.5)
 
         #TODO check gripper
 

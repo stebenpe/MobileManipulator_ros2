@@ -17,9 +17,10 @@
   </link>
   <link name="main_body">
     <visual>
-      <origin rpy="0 0 1.5707963267949" xyz="0 0 0.244"/>
+      <origin rpy="1.5707963267949 0 1.5707963267949" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://amr_visualisation/meshes/LD90.obj"/>
+        <!-- <mesh filename="package://amr_visualisation/meshes/LD90.obj"/> -->
+        <mesh filename="package://tmr_description/meshes/tm5-900/visual/tm5_base.obj"/>
       </geometry>
       <material name="white"/>
     </visual>
@@ -50,7 +51,8 @@
     <visual>
       <origin rpy="0 0 1.5707963267949" xyz="-0.019 0 0.368"/>
       <geometry>
-        <mesh filename="package://omron_moma/chassis.obj"/>
+        <!-- <mesh filename="package://omron_moma/chassis.obj"/> -->
+        <mesh filename="package://tmr_description/meshes/tm5-900/visual/tm5_base.obj"/>
       </geometry>
     </visual>
     <collision>

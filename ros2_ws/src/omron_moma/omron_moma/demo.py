@@ -136,8 +136,8 @@ class Coordinates:
             self.view_place = self.data['view_place']
             self.vbase_pick = self.data['vbase_pick']
             self.vbase_place = self.data['vbase_place']
-            self.safeplace_block = self.data['safeplace_block']
-            self.block = self.data['block']
+            self.pos1 = self.data['pos1']
+            self.pos2 = self.data['pos2']
 
 class TMHandler:
     def __init__(self, node, pickplace_driver):
@@ -150,9 +150,9 @@ class TMHandler:
         self.pickplace_driver.wait_tm_connect()
       
     # Executes the pickplace sequence at the designated goal
-    def execute_tm(self, coord, action_client, node):
+    def execute_tm(self, coord, action_client, node):       
         self.tf.add_vbases(coord.vbase_pick, coord.vbase_place, 0, False)
-     
+
         self.pickplace_driver.set_position(coord.view_pick)
         if not self.pickplace_driver.error:
             # get positions of the pick operation
@@ -177,21 +177,28 @@ class TMHandler:
             # moves the gripper back to above the object
             self.pickplace_driver.set_position(safepick)
 
-        self.pickplace_driver.set_position(coord.safeplace_block)
-        self.pickplace_driver.set_position(coord.block)
-        self.pickplace_driver.open()
-        self.pickplace_driver.set_position(coord.safeplace_block)
+
         self.pickplace_driver.set_position(coord.home_pos)
 
         goal2result = action_client.send_goal('Goal2')
-        if not ("Arrived at" in goal2result):
+        while not ("Arrived at" in goal2result):
             node.get_logger().info("Failed to arrive at goal!")
-            exit()
-        
-        self.pickplace_driver.set_position(coord.safeplace_block)
-        self.pickplace_driver.set_position(coord.block)
-        self.pickplace_driver.close()
-        self.pickplace_driver.set_position(coord.safeplace_block)
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal2result = action_client.send_goal('Goal2')
+
+        self.pickplace_driver.set_position(coord.pos1)
+        self.pickplace_driver.set_position(coord.pos2)
+        self.pickplace_driver.set_position(coord.pos1)
+        self.pickplace_driver.set_position(coord.pos2)
+        self.pickplace_driver.set_position(coord.home_pos)
+
+        goal1result = action_client.send_goal('Goal1')
+        while not ("Arrived at" in goal1result):
+            node.get_logger().info("Failed to arrive at goal!")
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal1result = action_client.send_goal('Goal1')
 
         self.pickplace_driver.set_position(coord.view_place)
         if not self.pickplace_driver.error:
@@ -213,6 +220,81 @@ class TMHandler:
             self.pickplace_driver.set_position(safeplace)
 
         self.pickplace_driver.set_position(coord.home_pos)
+
+        goal2result = action_client.send_goal('Goal2')
+        while not ("Arrived at" in goal2result):
+            node.get_logger().info("Failed to arrive at goal!")
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal2result = action_client.send_goal('Goal2')
+
+        goal1result = action_client.send_goal('Goal1')
+        while not ("Arrived at" in goal1result):
+            node.get_logger().info("Failed to arrive at goal!")
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal1result = action_client.send_goal('Goal1')
+
+        self.pickplace_driver.set_position(coord.view_place)
+        if not self.pickplace_driver.error:
+            # get positions of the place operation
+            place, safeplace = get_positions(self.pickplace_driver, self.node, self.cli, self.tf, "vbase_place", coord.vjob_name)
+            # set the parameters of the flange destination
+            call_set_parameters(self.node, place)
+            # moves the gripper to above the place location
+            self.pickplace_driver.set_position(safeplace)
+            # moves the gripper to the place location and open the grippers
+            self.pickplace_driver.set_position(place)
+            self.pickplace_driver.close()
+            # sets the cube display to appear at the place location
+            msg = MoveCube()
+            msg.parent = "tm_base"
+            msg.coordinates = place
+            self.flagpublisher.publish(msg)
+            # moves the gripper back to above the object
+            self.pickplace_driver.set_position(safeplace)
+
+        self.pickplace_driver.set_position(coord.home_pos)
+
+        self.pickplace_driver.set_position(coord.view_pick)
+        if not self.pickplace_driver.error:
+            # get positions of the pick operation
+            pick, safepick = get_positions(self.pickplace_driver, self.node, self.cli, self.tf, "vbase_pick", coord.vjob_name)
+            # set the parameters of the flange destination
+            call_set_parameters(self.node, pick)
+            # sets the cube display to appear at the pick location
+            msg = MoveCube()
+            msg.parent = "tm_base"
+            msg.coordinates = pick
+            self.flagpublisher.publish(msg)
+            # moves the grippers above the object and open the grippers
+            self.pickplace_driver.set_position(safepick)
+            # moves the grippers down to the object picking location and close the grippers
+            self.pickplace_driver.set_position(pick)
+            self.pickplace_driver.open()
+            # sets marker to be joined to the end effector
+            msg.parent = "EOAT"
+            msg.coordinates = pick
+            self.flagpublisher.publish(msg)
+            # moves the gripper back to above the object
+            self.pickplace_driver.set_position(safepick)
+
+
+        self.pickplace_driver.set_position(coord.home_pos)
+
+        goal2result = action_client.send_goal('Goal2')
+        while not ("Arrived at" in goal2result):
+            node.get_logger().info("Failed to arrive at goal!")
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal2result = action_client.send_goal('Goal2')
+
+        goal1result = action_client.send_goal('Goal1')
+        while not ("Arrived at" in goal1result):
+            node.get_logger().info("Failed to arrive at goal!")
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal1result = action_client.send_goal('Goal1')
 
         if self.pickplace_driver.error:
             self.node.get_logger().info("TM ERROR, SHUTTING DOWN PROGRAM!")
@@ -255,17 +337,19 @@ def main():
     # Set the TM to move to the designated home position
     current_position = get_current_pos(node, cli)
     if not check_same_positions(current_position, Goal1_coords.home_pos):
-        # node.get_logger().info(str(current_position))
-        # node.get_logger().info(str(Goal1_coords.home_pos))
         pickplace_driver.set_position(Goal1_coords.home_pos)
     
     try:     
         goal1result = action_client.send_goal('Goal1')
-        if not ("Arrived at" in goal1result):
+        while not ("Arrived at" in goal1result):
             node.get_logger().info("Failed to arrive at goal!")
-            exit()
+            node.get_logger().info("Trying again in 1 second...")
+            time.sleep(1)
+            goal1result = action_client.send_goal('Goal1')
+
         publish_view(Goal1_coords, viewpickpub, viewplacepub)
-        tm_handler.execute_tm(Goal1_coords, action_client, node)
+        for x in range(6):
+            tm_handler.execute_tm(Goal1_coords, action_client, node)
         zero = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         call_set_parameters(node, zero)
         flagpublisher = node.create_publisher(MoveCube, 'objectflag', 10)
