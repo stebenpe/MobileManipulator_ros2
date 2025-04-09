@@ -27,6 +27,7 @@ setup(
             "get_drink_state_machine = state_machine.get_drink_state_machine:main",
             "demo = state_machine.demo:main",
             "moma_beckhoff = state_machine.moma_beckhoff:main",
+            "website_integration = state_machine.website_integration:main",
             "moma_opc_ua = state_machine.moma_opc_ua:main"
         ],
     },

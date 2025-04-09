@@ -70,6 +70,10 @@ def generate_launch_description():
         package='rosbridge_server',
         executable='rosbridge_websocket',
         output='screen',
+        parameters=[{
+            'use_compression': True,  # Enable message compression
+            'fragment_size': 10000000,  # 10MB fragment size (adjust as needed)
+        }]
     )
 
     griperdriver_node = Node(package='robotiq_85_driver',

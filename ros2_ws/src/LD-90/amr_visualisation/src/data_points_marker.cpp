@@ -4,8 +4,11 @@
 DataPointsMarker::DataPointsMarker() : Node("map_publisher")
 {
   using namespace std::chrono_literals;
-  
-  map_pub = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map_grid", 10);
+  rclcpp::QoS map_qos(rclcpp::KeepLast(1));
+  map_qos.reliable();
+  map_qos.transient_local();  // Latched QoS for new subscribers
+
+  map_pub = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map_grid", map_qos);
   fa_pub = this->create_publisher<visualization_msgs::msg::MarkerArray>("f_areas", 10);
 
   set_forbidden_area_params();
@@ -20,8 +23,17 @@ DataPointsMarker::DataPointsMarker() : Node("map_publisher")
   initialize_map();
   fill_map();
 
-  timer = this->create_wall_timer(
-    500ms, std::bind(&DataPointsMarker::timer_callback, this));
+  // Final verification before publishing
+  if (grid.info.width > 0 && grid.info.height > 0 && !grid.data.empty()) {
+    grid.header.stamp = this->get_clock()->now();
+    map_pub->publish(grid);
+    RCLCPP_INFO(this->get_logger(), "Map published successfully (latched)");
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "Map initialization failed");
+  }
+
+  // timer = this->create_wall_timer(
+  //   500ms, std::bind(&DataPointsMarker::timer_callback, this));
 }
 
 void DataPointsMarker::timer_callback()
@@ -437,7 +449,7 @@ void DataPointsMarker::initialize_map()
 void DataPointsMarker::set_grid_attributes()
 {
   grid.header.stamp = this->get_clock()->now();
-  grid.info.resolution = 0.02;
+  grid.info.resolution = 0.05; //standard 0.02
   grid.info.origin.orientation = createQuaternionMsgFromYaw(0);
   grid.header.frame_id = "/map";
 

@@ -1,9 +1,11 @@
 import rclpy
 import time
+from rclpy.action import ActionClient
 from pp_library.TM_Exception import TM_Exception
 from tm_msgs.srv import *
 from tm_msgs.msg import *
-from robotiq_85_msgs.msg import GripperCmd
+# from robotiq_85_msgs.msg import GripperCmd
+from control_msgs.action import GripperCommand
 """
 TO DO:
     - Add end effector initialise sequence
@@ -78,13 +80,6 @@ class PickPlaceClass:
         self.isNotConnected = True
         self.subscription = self.node.create_subscription(SctResponse, 'sct_response', self.listener_callback, 10)
         self.subscription  # prevent unused variable warning
-
-        ###################################################################
-        #                          Robotiq gripper init                            #
-        ###################################################################
-
-        self._gripper_pub = self.node.create_publisher(GripperCmd, '/gripper/cmd', 10)
-        self._gripper_cmd = [GripperCmd()] * 1
 
 
     ###################################################################

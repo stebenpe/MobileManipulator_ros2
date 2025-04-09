@@ -7,7 +7,7 @@ from ament_index_python.packages import get_package_share_directory
 moma_share = get_package_share_directory('omron_moma')
 pp_library =  get_package_share_directory('pickplace') + '/pickplace/pp_library'
 
-from pp_library import Pickplace_Driver, Transform, TM_Exception
+from pp_library import Pickplace_Driver, Transform, TM_Exception, Modbus
 from om_aiv_navigation.goto_goal import AmrActionClient
 from pickplace_msgs.srv import AskModbus
 from pickplace_msgs.msg import MoveCube
@@ -322,6 +322,10 @@ def main():
     while not cli.wait_for_service(timeout_sec=1.0):
         print("Service not available...")
     req = AskModbus.Request()
+    modbus = Modbus.ModbusClass()
+    modbus.start_program()
+    node.get_logger().info("Power draw:")
+    modbus.get_power_draw()
     req.req = 'init_io'
     future = cli.call_async(req)
     rclpy.spin_until_future_complete(node, future)
